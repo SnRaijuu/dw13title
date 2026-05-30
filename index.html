@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Title Card Generator</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@400;500;600;700&family=Marcellus+SC&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0d0d10;
+      --panel: #18181d;
+      --panel-2: #202027;
+      --text: #eeeeee;
+      --muted: #a9a9b3;
+      --line: #30303a;
+      --accent: #d6a86b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 18px;
+      padding: 18px;
+      min-height: 100vh;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      height: fit-content;
+      position: sticky;
+      top: 18px;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 11px;
+      font: inherit;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: 1fr 48px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .value {
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      font-size: 13px;
+    }
+
+    .checks {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .check {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      user-select: none;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 16px;
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #e0b675, #9f6841);
+      color: #140b06;
+      font-weight: 800;
+      padding: 12px 14px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .preview-wrap {
+      min-width: 0;
+      display: grid;
+      align-items: start;
+    }
+
+    .canvas-shell {
+      background: #050506;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px;
+      overflow: auto;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #000;
+      border-radius: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="panel">
+      <h1>Генератор титульной карточки</h1>
+      <label for="titleInput">Название серии</label>
+      <input id="titleInput" type="text" value="THE GHOST MONUMENT">
+
+      <label for="byInput">Строка автора</label>
+      <input id="byInput" type="text" value="Written by">
+
+      <label for="writerInput">Имя сценариста</label>
+      <input id="writerInput" type="text" value="CHRIS CHIBNALL">
+
+      <label for="titleSize">Размер названия</label>
+      <div class="slider-row">
+        <input id="titleSize" type="range" min="32" max="140" value="105">
+        <div id="titleSizeValue" class="value">82</div>
+      </div>
+
+      <label for="bySize">Размер строки автора</label>
+      <div class="slider-row">
+        <input id="bySize" type="range" min="16" max="70" value="34">
+        <div id="bySizeValue" class="value">34</div>
+      </div>
+
+      <label for="writerSize">Размер имени сценариста</label>
+      <div class="slider-row">
+        <input id="writerSize" type="range" min="22" max="90" value="52">
+        <div id="writerSizeValue" class="value">46</div>
+      </div>
+
+      <label for="letterSpacing">Разрядка букв</label>
+      <div class="slider-row">
+        <input id="letterSpacing" type="range" min="0" max="28" value="10">
+        <div id="letterSpacingValue" class="value">10</div>
+      </div>
+
+      <label for="verticalShift">Сдвиг текста по вертикали</label>
+      <div class="slider-row">
+        <input id="verticalShift" type="range" min="-160" max="160" value="0">
+        <div id="verticalShiftValue" class="value">0</div>
+      </div>
+
+      <div class="checks">
+        <label class="check">
+          <input id="titleUppercase" type="checkbox" checked>
+          Название капсом
+        </label>
+
+        <label class="check">
+          <input id="writerUppercase" type="checkbox" checked>
+          Имя сценариста капсом
+        </label>
+      </div>
+
+      <button id="downloadBtn" type="button">Скачать PNG</button>
+
+      <p class="note">
+        Фон больше не используется: карточка собирается из чёрной подложки, световых полос и текстовых текстур.
+      </p>
+    </section>
+
+    <section class="preview-wrap">
+      <div class="canvas-shell">
+        <canvas id="canvas" width="2048" height="1536"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const titleInput = document.getElementById("titleInput");
+    const byInput = document.getElementById("byInput");
+    const writerInput = document.getElementById("writerInput");
+
+    const titleSize = document.getElementById("titleSize");
+    const bySize = document.getElementById("bySize");
+    const writerSize = document.getElementById("writerSize");
+    const letterSpacing = document.getElementById("letterSpacing");
+    const verticalShift = document.getElementById("verticalShift");
+
+    const titleSizeValue = document.getElementById("titleSizeValue");
+    const bySizeValue = document.getElementById("bySizeValue");
+    const writerSizeValue = document.getElementById("writerSizeValue");
+    const letterSpacingValue = document.getElementById("letterSpacingValue");
+    const verticalShiftValue = document.getElementById("verticalShiftValue");
+
+    const titleUppercase = document.getElementById("titleUppercase");
+    const writerUppercase = document.getElementById("writerUppercase");
+
+    const downloadBtn = document.getElementById("downloadBtn");
+    const sampledTextStripes = {};
+    const fixedTextureImages = {
+      title: new Image(),
+      by: new Image(),
+      writer: new Image()
+    };
+
+    fixedTextureImages.title.onload = () => draw();
+    fixedTextureImages.by.onload = () => draw();
+    fixedTextureImages.writer.onload = () => draw();
+
+    fixedTextureImages.title.src = "title_texture.png";
+    fixedTextureImages.by.src = "by_texture.png";
+    fixedTextureImages.writer.src = "writer_texture.png";
+
+    function invalidateTextSamples() {
+      Object.keys(sampledTextStripes).forEach((key) => delete sampledTextStripes[key]);
+    }
+    function makeFallbackBackground() {
+      canvas.width = 2048;
+      canvas.height = 1536;
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawStreaks(canvas.width, canvas.height);
+    }
+
+    function updateSliderLabels() {
+      titleSizeValue.textContent = titleSize.value;
+      bySizeValue.textContent = bySize.value;
+      writerSizeValue.textContent = writerSize.value;
+      letterSpacingValue.textContent = letterSpacing.value;
+      verticalShiftValue.textContent = verticalShift.value;
+    }
+
+    function draw() {
+      updateSliderLabels();
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const shift = Number(verticalShift.value);
+
+      // индивидуальные базовые сдвиги
+      const titleBaseShift = 8;
+      const byBaseShift = 5;
+      const writerBaseShift = 5;
+
+      // Фон отключён: рисуем только чистую чёрную подложку.
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, w, h);
+
+      drawStreaks(
+        w,
+        h,
+        Number(titleSize.value),
+        Number(bySize.value),
+        Number(writerSize.value)
+      );
+
+      const titleText = titleUppercase.checked
+        ? titleInput.value.toLocaleUpperCase("ru-RU")
+        : titleInput.value;
+
+      const writerText = writerUppercase.checked
+        ? writerInput.value.toLocaleUpperCase("ru-RU")
+        : writerInput.value;
+
+      drawCinematicText({
+        text: titleText,
+        x: w * 0.5,
+        y: h * 0.444 + shift + titleBaseShift,
+        size: Number(titleSize.value),
+        spacing: Number(letterSpacing.value),
+        weight: 500,
+        maxWidth: w * 0.82,
+        glow: 18,
+        textureKind: "title"
+      });
+
+      drawCinematicText({
+        text: byInput.value,
+        x: w * 0.5,
+        y: h * 0.552 + shift + byBaseShift,
+        size: Number(bySize.value),
+        spacing: Math.max(1, Number(letterSpacing.value) * 0.27),
+        weight: 400,
+        maxWidth: w * 0.45,
+        glow: 9,
+        textureKind: "by"
+      });
+
+      drawCinematicText({
+        text: writerText,
+        x: w * 0.5,
+        y: h * 0.596 + shift + writerBaseShift,
+        size: Number(writerSize.value),
+        spacing: Math.max(2, Number(letterSpacing.value) * 0.55),
+        weight: 500,
+        maxWidth: w * 0.62,
+        glow: 12,
+        textureKind: "writer"
+      });
+    }
+        function drawStreaks(w, h, currentTitleSize = 82, currentBySize = 34, currentWriterSize = 46) {
+          ctx.save();
+          ctx.globalCompositeOperation = "lighter";
+
+          drawHorizontalGlow(w, h * 0.444 - 3, currentTitleSize * 0.72, 0.28);
+          drawHorizontalGlow(w, h * 0.552 + 2, currentBySize * 0.72, 0.12);
+          drawHorizontalGlow(w, h * 0.596, currentWriterSize * 0.72, 0.14);
+
+          const redGlow = ctx.createRadialGradient(
+            w * 0.78, h * 0.50, 0,
+            w * 0.78, h * 0.50, w * 0.35
+          );
+          redGlow.addColorStop(0, "rgba(100, 35, 25, 0.11)");
+          redGlow.addColorStop(0.55, "rgba(45, 18, 18, 0.045)");
+          redGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
+          ctx.fillStyle = redGlow;
+          ctx.fillRect(0, 0, w, h);
+
+          ctx.restore();
+        }
+
+    function drawHorizontalGlow(w, y, height, alpha) {
+      const g = ctx.createLinearGradient(0, 0, w, 0);
+      g.addColorStop(0, "rgba(0, 0, 0, 0)");
+      g.addColorStop(0.12, `rgba(0, 10, 40, ${alpha * 0.35})`);
+      g.addColorStop(0.50, `rgba(8, 28, 76, ${alpha})`);
+      g.addColorStop(0.88, `rgba(0, 10, 40, ${alpha * 0.35})`);
+      g.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+      ctx.fillStyle = g;
+      ctx.fillRect(0, y - height / 2, w, height);
+
+      ctx.fillStyle = `rgba(35, 90, 150, ${alpha * 0.18})`;
+      ctx.fillRect(0, y - 1, w, 2);
+    }
+
+    function drawCinematicText(options) {
+      const text = normalizeText(options.text);
+      if (text.length === 0) return;
+
+      const fontFamily = "'Marcellus SC', 'Cormorant SC', 'Cinzel', 'Trajan Pro', Georgia, serif";
+      let size = options.size;
+      let spacing = options.spacing;
+      const weight = options.weight;
+      const maxWidth = options.maxWidth;
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.save();
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      ctx.font = `${weight} ${size}px ${fontFamily}`;
+      let measured = measureSpacedText(text, spacing);
+
+
+      const xStart = options.x - measured / 2;
+      const y = options.y;
+      const pad = Math.ceil(size * 1.00 + options.glow * 2);
+      const localWidth = Math.ceil(measured + pad * 2);
+      const localHeight = Math.ceil(size * 2.45 + pad * 2);
+      const localY = localHeight / 2;
+      const originX = xStart - pad;
+      const originY = y - localY;
+
+      const maskCanvas = document.createElement("canvas");
+      maskCanvas.width = localWidth;
+      maskCanvas.height = localHeight;
+      const maskCtx = maskCanvas.getContext("2d");
+      maskCtx.font = `${weight} ${size}px ${fontFamily}`;
+      maskCtx.textBaseline = "middle";
+      maskCtx.textAlign = "left";
+      maskCtx.fillStyle = "#ffffff";
+      drawSpacedTextOn(maskCtx, text, pad, localY, spacing, false, true);
+
+      const fillCanvas = document.createElement("canvas");
+      fillCanvas.width = localWidth;
+      fillCanvas.height = localHeight;
+      const fillCtx = fillCanvas.getContext("2d");
+
+      // 1) Окраска из текстуры:
+      // X привязан к кадру, а Y к самой строке
+      drawFixedTextureIntoText(
+        fillCtx,
+        options.textureKind || "title",
+        originX,
+        localWidth,
+        localHeight,
+        w
+      );
+
+      // 2) Объём
+
+                    // Верхний
+                    fillCtx.save();
+                    fillCtx.globalCompositeOperation = "screen";
+
+                    const topBevel = fillCtx.createLinearGradient(
+                      0,
+                      localY - size * 0.90,
+                      0,
+                      localY + size * 0.10
+                    );
+
+                    topBevel.addColorStop(0.00, "rgba(255, 248, 218, 0.30)");
+                    topBevel.addColorStop(0.18, "rgba(255, 248, 218, 0.16)");
+                    topBevel.addColorStop(0.38, "rgba(255, 230, 180, 0.06)");
+                    topBevel.addColorStop(0.62, "rgba(255, 230, 180, 0.00)");
+                    topBevel.addColorStop(1.00, "rgba(255, 230, 180, 0.00)");
+
+                    fillCtx.fillStyle = topBevel;
+                    fillCtx.fillRect(0, localY - size, localWidth, size * 1.05);
+                    fillCtx.restore();
+
+                    // Низ
+                    fillCtx.save();
+                    fillCtx.globalCompositeOperation = "multiply";
+
+                    const bottomShade = fillCtx.createLinearGradient(
+                      0,
+                      localY - size * 0.06,
+                      0,
+                      localY + size * 0.92
+                    );
+
+                    bottomShade.addColorStop(0.00, "rgba(70, 22, 18, 0.00)");
+                    bottomShade.addColorStop(0.42, "rgba(70, 22, 18, 0.05)");
+                    bottomShade.addColorStop(0.76, "rgba(48, 14, 12, 0.16)");
+                    bottomShade.addColorStop(1.00, "rgba(34, 8, 7, 0.28)");
+
+                    fillCtx.fillStyle = bottomShade;
+                    fillCtx.fillRect(0, localY - size * 0.08, localWidth, size * 1.18);
+                    fillCtx.restore();
+
+
+                    fillCtx.save();
+                    fillCtx.font = `${weight} ${size}px ${fontFamily}`;
+                    fillCtx.textBaseline = "middle";
+                    fillCtx.textAlign = "left";
+                    fillCtx.lineJoin = "round";
+                    fillCtx.miterLimit = 1.2;
+                    fillCtx.globalCompositeOperation = "screen";
+                    fillCtx.lineWidth = Math.max(0.6, size * 0.012);
+                    fillCtx.strokeStyle = "rgba(255, 245, 210, 0.18)";
+
+                    drawSpacedTextOn(
+                      fillCtx,
+                      text,
+                      pad - size * 0.004,
+                      localY - size * 0.010,
+                      spacing,
+                      true,
+                      false
+                    );
+
+                    fillCtx.restore();
+
+
+                    fillCtx.save();
+                    fillCtx.font = `${weight} ${size}px ${fontFamily}`;
+                    fillCtx.textBaseline = "middle";
+                    fillCtx.textAlign = "left";
+                    fillCtx.lineJoin = "round";
+                    fillCtx.miterLimit = 1.2;
+                    fillCtx.globalCompositeOperation = "multiply";
+                    fillCtx.lineWidth = Math.max(0.6, size * 0.014);
+                    fillCtx.strokeStyle = "rgba(48, 13, 10, 0.18)";
+
+                    drawSpacedTextOn(
+                      fillCtx,
+                      text,
+                      pad + size * 0.005,
+                      localY + size * 0.014,
+                      spacing,
+                      true,
+                      false
+                    );
+
+                    fillCtx.restore();
+
+      // 3) Маска 
+      fillCtx.globalCompositeOperation = "destination-in";
+      fillCtx.drawImage(maskCanvas, 0, 0);
+
+// 4) контур 
+ctx.save();
+ctx.font = `${weight} ${size}px ${fontFamily}`;
+ctx.textBaseline = "middle";
+ctx.textAlign = "left";
+ctx.lineJoin = "round";
+ctx.miterLimit = 1.15;
+ctx.globalCompositeOperation = "source-over";
+
+// ПОД буквами подложка
+ctx.shadowColor = "rgba(38, 10, 8, 0.42)";
+ctx.shadowBlur = Math.max(1.4, size * 0.055);
+ctx.shadowOffsetX = 0;
+ctx.shadowOffsetY = 0;
+ctx.lineWidth = Math.max(1.2, size * 0.030);
+ctx.strokeStyle = "rgba(42, 12, 10, 0.30)";
+drawSpacedTextOn(ctx, text, xStart, y, spacing, true, false);
+
+// слабый ближний край
+ctx.shadowColor = "rgba(0, 0, 0, 0)";
+ctx.shadowBlur = 0;
+ctx.lineWidth = Math.max(0.45, size * 0.010);
+ctx.strokeStyle = "rgba(60, 20, 16, 0.28)";
+drawSpacedTextOn(ctx, text, xStart, y, spacing, true, false);
+
+ctx.restore();
+
+      ctx.drawImage(fillCanvas, xStart - pad, y - localY);
+
+      ctx.save();
+      ctx.font = `${weight} ${size}px ${fontFamily}`;
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      ctx.globalCompositeOperation = "screen";
+      ctx.fillStyle = "rgba(255, 247, 220, 0.045)";
+      drawSpacedTextOn(ctx, text, xStart - size * 0.003, y - size * 0.010, spacing, false, true);
+      ctx.restore();
+
+      ctx.restore();
+    }
+
+    function drawFixedTextureIntoText(context, kind, originX, localWidth, localHeight, frameWidth) {
+      const texture = fixedTextureImages[kind];
+
+      if (texture && texture.complete && texture.naturalWidth > 0) {
+        const sx = Math.max(0, Math.min(texture.naturalWidth - 1, Math.round(originX)));
+        const sw = Math.max(1, Math.min(texture.naturalWidth - sx, Math.round(localWidth)));
+
+        context.drawImage(
+          texture,
+          sx, 0, sw, texture.naturalHeight,
+          0, 0, localWidth, localHeight
+        );
+        return;
+      }
+
+      const fallback = makeFallbackTexture(kind, frameWidth, localHeight);
+      context.drawImage(
+        fallback.canvas,
+        Math.max(0, Math.round(originX)), 0, Math.max(1, Math.round(localWidth)), fallback.canvas.height,
+        0, 0, localWidth, localHeight
+      );
+    }
+
+    function paintSampledOriginalTextTexture(context, frameWidth, frameHeight, kind) {
+      const texture = fixedTextureImages[kind];
+      const cfg = getOriginalTextSampleConfig(kind, frameWidth, frameHeight);
+      if (texture && texture.complete && texture.naturalWidth > 0) {
+        context.drawImage(texture, 0, cfg.y0, frameWidth, cfg.y1 - cfg.y0);
+        return;
+      }
+      const fallback = makeFallbackTexture(kind, frameWidth, cfg.y1 - cfg.y0);
+      context.drawImage(fallback.canvas, 0, cfg.y0);
+    }
+
+    function getSampledOriginalTexture(kind, frameWidth, frameHeight) {
+      if (sampledTextStripes[kind]) return sampledTextStripes[kind];
+      const cfg = getOriginalTextSampleConfig(kind, frameWidth, frameHeight);
+      const fallback = makeFallbackTexture(kind, frameWidth, cfg.y1 - cfg.y0);
+
+      sampledTextStripes[kind] = fallback;
+      return fallback;
+    }
+
+    function getOriginalTextSampleConfig(kind, w, h) {
+      if (kind === "by") {
+        return {
+          y0: Math.round(h * 0.540),
+          y1: Math.round(h * 0.566),
+          lum: 18,
+          sat: 6,
+          minR: 28,
+          minG: 16,
+          warmR: 1.05,
+          warmG: 0.65,
+          minSamplesPerRow: 8,
+          smoothX: 10,
+          smoothY: 2
+        };
+      }
+      if (kind === "writer") {
+        return {
+          y0: Math.round(h * 0.581),
+          y1: Math.round(h * 0.614),
+          lum: 20,
+          sat: 7,
+          minR: 30,
+          minG: 17,
+          warmR: 1.06,
+          warmG: 0.68,
+          minSamplesPerRow: 14,
+          smoothX: 12,
+          smoothY: 2
+        };
+      }
+      return {
+        y0: Math.round(h * 0.418),
+        y1: Math.round(h * 0.4715),
+        lum: 24,
+        sat: 8,
+        minR: 28,
+        minG: 18,
+        warmR: 1.07,
+        warmG: 0.72,
+        minSamplesPerRow: 18,
+        smoothX: 14,
+        smoothY: 2
+      };
+    }
+
+    function fillMissingRows(rows, width, cfg, fallbackColors) {
+      const height = rows.length;
+      let lastGood = null;
+      for (let y = 0; y < height; y += 1) {
+        if (rows[y]) {
+          lastGood = rows[y];
+        } else if (lastGood) {
+          rows[y] = cloneRow(lastGood);
+        }
+      }
+      let nextGood = null;
+      for (let y = height - 1; y >= 0; y -= 1) {
+        if (rows[y]) {
+          nextGood = rows[y];
+        } else if (nextGood) {
+          rows[y] = cloneRow(nextGood);
+        }
+      }
+      for (let y = 0; y < height; y += 1) {
+        if (!rows[y]) {
+          rows[y] = fallbackColors.map((c) => [c[0], c[1], c[2]]);
+        }
+      }
+    }
+
+    function fillMissingColors1D(row, fallbackColors) {
+      const width = row.length;
+      const result = new Array(width);
+      const existing = [];
+      for (let x = 0; x < width; x += 1) {
+        if (row[x]) existing.push(x);
+      }
+      if (existing.length === 0) {
+        return fallbackColors.map((c) => [c[0], c[1], c[2]]);
+      }
+      if (existing.length === 1) {
+        const c = row[existing[0]];
+        return new Array(width).fill(null).map(() => [c[0], c[1], c[2]]);
+      }
+      for (let x = 0; x < width; x += 1) {
+        if (row[x]) {
+          result[x] = row[x];
+          continue;
+        }
+        let leftIndex = -1;
+        let rightIndex = -1;
+        for (let i = existing.length - 1; i >= 0; i -= 1) {
+          if (existing[i] < x) {
+            leftIndex = existing[i];
+            break;
+          }
+        }
+        for (let i = 0; i < existing.length; i += 1) {
+          if (existing[i] > x) {
+            rightIndex = existing[i];
+            break;
+          }
+        }
+        if (leftIndex === -1) {
+          const c = row[rightIndex];
+          result[x] = [c[0], c[1], c[2]];
+        } else if (rightIndex === -1) {
+          const c = row[leftIndex];
+          result[x] = [c[0], c[1], c[2]];
+        } else {
+          const t = (x - leftIndex) / Math.max(1, rightIndex - leftIndex);
+          result[x] = mixColor(row[leftIndex], row[rightIndex], t);
+        }
+      }
+      return result;
+    }
+
+    function smoothRowsHorizontal(rows, radius) {
+      if (radius <= 0) return;
+      for (let y = 0; y < rows.length; y += 1) {
+        rows[y] = smoothColorRow(rows[y], radius);
+      }
+    }
+
+    function smoothRowsVertical(rows, radius) {
+      if (radius <= 0) return;
+      const height = rows.length;
+      const width = rows[0].length;
+      const out = new Array(height);
+      for (let y = 0; y < height; y += 1) {
+        out[y] = new Array(width);
+      }
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          let sr = 0;
+          let sg = 0;
+          let sb = 0;
+          let sw = 0;
+          for (let d = -radius; d <= radius; d += 1) {
+            const yy = Math.max(0, Math.min(height - 1, y + d));
+            const weight = 1 - Math.abs(d) / (radius + 1);
+            const c = rows[yy][x];
+            sr += c[0] * weight;
+            sg += c[1] * weight;
+            sb += c[2] * weight;
+            sw += weight;
+          }
+          out[y][x] = [sr / sw, sg / sw, sb / sw];
+        }
+      }
+      for (let y = 0; y < height; y += 1) rows[y] = out[y];
+    }
+
+    function smoothColorRow(row, radius) {
+      const width = row.length;
+      const result = new Array(width);
+      for (let x = 0; x < width; x += 1) {
+        let sr = 0;
+        let sg = 0;
+        let sb = 0;
+        let sw = 0;
+        for (let d = -radius; d <= radius; d += 1) {
+          const xx = Math.max(0, Math.min(width - 1, x + d));
+          const weight = 1 - Math.abs(d) / (radius + 1);
+          const c = row[xx];
+          sr += c[0] * weight;
+          sg += c[1] * weight;
+          sb += c[2] * weight;
+          sw += weight;
+        }
+        result[x] = [sr / sw, sg / sw, sb / sw];
+      }
+      return result;
+    }
+
+    function cloneRow(row) {
+      return row.map((c) => c ? [c[0], c[1], c[2]] : null);
+    }
+
+    function makeFallbackTexture(kind, width, height) {
+      const colors = [];
+      const stops = kind === "title"
+        ? [
+            [0.00, [155, 112, 82]],
+            [0.19, [200, 161, 121]],
+            [0.40, [247, 232, 190]],
+            [0.50, [173, 123, 88]],
+            [0.71, [247, 232, 192]],
+            [1.00, [161, 114, 83]]
+          ]
+        : kind === "by"
+          ? [
+              [0.00, [96, 72, 58]],
+              [0.50, [145, 111, 92]],
+              [1.00, [96, 72, 58]]
+            ]
+          : [
+              [0.00, [110, 70, 58]],
+              [0.50, [157, 114, 95]],
+              [1.00, [110, 70, 58]]
+            ];
+      for (let x = 0; x < width; x += 1) {
+        const t = x / Math.max(1, width - 1);
+        colors.push(sampleStops(stops, t));
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const cctx = canvas.getContext("2d");
+      const img = cctx.createImageData(width, height);
+      const out = img.data;
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const i = (y * width + x) * 4;
+          const c = colors[x];
+          out[i] = c[0];
+          out[i + 1] = c[1];
+          out[i + 2] = c[2];
+          out[i + 3] = 255;
+        }
+      }
+      cctx.putImageData(img, 0, 0);
+      return { canvas, y0: 0, colors };
+    }
+
+    function sampleStops(stops, t) {
+      for (let i = 0; i < stops.length - 1; i += 1) {
+        const a = stops[i];
+        const b = stops[i + 1];
+        if (t >= a[0] && t <= b[0]) {
+          const localT = (t - a[0]) / Math.max(0.0001, b[0] - a[0]);
+          return mixColor(a[1], b[1], smoothstep(localT));
+        }
+      }
+      return stops[stops.length - 1][1];
+    }
+
+    function mixColor(a, b, t) {
+      return [
+        a[0] + (b[0] - a[0]) * t,
+        a[1] + (b[1] - a[1]) * t,
+        a[2] + (b[2] - a[2]) * t
+      ];
+    }
+
+    function smoothstep(t) {
+      return t * t * (3 - 2 * t);
+    }
+
+    function clampColor(value) {
+      return Math.max(0, Math.min(255, Math.round(value)));
+    }
+
+    function addWorldSpot(context, localX, localY, radiusX, radiusY, intensity) {
+      context.save();
+      context.translate(localX, localY);
+      context.scale(1, radiusY / radiusX);
+
+      const hotspot = context.createRadialGradient(0, 0, 0, 0, 0, radiusX);
+      hotspot.addColorStop(0.000, `rgba(255, 255, 224, ${0.70 * intensity})`);
+      hotspot.addColorStop(0.150, `rgba(255, 232, 160, ${0.58 * intensity})`);
+      hotspot.addColorStop(0.360, `rgba(238, 158, 88, ${0.30 * intensity})`);
+      hotspot.addColorStop(0.660, `rgba(140, 54, 40, ${0.07 * intensity})`);
+      hotspot.addColorStop(1.000, "rgba(0, 0, 0, 0)");
+
+      context.fillStyle = hotspot;
+      context.fillRect(-radiusX, -radiusX, radiusX * 2, radiusX * 2);
+      context.restore();
+    }
+
+    function normalizeText(value) {
+      return String(value)
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function measureSpacedText(text, spacing) {
+      const chars = Array.from(text);
+      let width = 0;
+
+      for (let i = 0; i < chars.length; i += 1) {
+        width += ctx.measureText(chars[i]).width;
+        if (i < chars.length - 1) width += spacing;
+      }
+
+      return width;
+    }
+
+    function drawSpacedText(text, x, y, spacing, stroke, fill) {
+      drawSpacedTextOn(ctx, text, x, y, spacing, stroke, fill);
+    }
+
+    function drawSpacedTextOn(context, text, x, y, spacing, stroke, fill) {
+      const chars = Array.from(text);
+      let cursor = x;
+
+      for (let i = 0; i < chars.length; i += 1) {
+        const ch = chars[i];
+
+        if (stroke) context.strokeText(ch, cursor, y);
+        if (fill) context.fillText(ch, cursor, y);
+
+        cursor += context.measureText(ch).width;
+        if (i < chars.length - 1) cursor += spacing;
+      }
+    }
+
+    function roundRect(context, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+
+      context.beginPath();
+      context.moveTo(x + r, y);
+      context.arcTo(x + width, y, x + width, y + height, r);
+      context.arcTo(x + width, y + height, x, y + height, r);
+      context.arcTo(x, y + height, x, y, r);
+      context.arcTo(x, y, x + width, y, r);
+      context.closePath();
+    }
+
+        function downloadPng() {
+          draw();
+
+          const rawTitle = normalizeText(titleInput.value) || "title-card";
+          const safeName = rawTitle
+            .toLocaleLowerCase("ru-RU")
+            .replace(/[^a-zа-яё0-9]+/gi, "-")
+            .replace(/^-+|-+$/g, "")
+            .slice(0, 60) || "title-card";
+
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              alert("Не получилось создать PNG.");
+              return;
+            }
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.href = url;
+            link.download = `${safeName}.png`;
+            link.style.display = "none";
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+          }, "image/png");
+        }
+    [
+      titleInput,
+      byInput,
+      writerInput,
+      titleSize,
+      bySize,
+      writerSize,
+      letterSpacing,
+      verticalShift,
+      titleUppercase,
+      writerUppercase
+    ].forEach((element) => {
+      element.addEventListener("input", draw);
+      element.addEventListener("change", draw);
+    });
+
+    downloadBtn.addEventListener("click", downloadPng);
+
+    document.fonts.ready.then(draw);
+  </script>
+</body>
+</html>
