@@ -175,11 +175,11 @@
 <body>
   <main class="app">
     <section class="panel">
-      <h1>Генератор титульной карточки</h1>
+      <h1>Генератор титров v1</h1>
       <label for="titleInput">Название серии</label>
       <input id="titleInput" type="text" value="THE GHOST MONUMENT">
 
-      <label for="byInput">Строка автора</label>
+      <label for="byInput">Автор сценария</label>
       <input id="byInput" type="text" value="Written by">
 
       <label for="writerInput">Имя сценариста</label>
@@ -191,7 +191,7 @@
         <div id="titleSizeValue" class="value">82</div>
       </div>
 
-      <label for="bySize">Размер строки автора</label>
+      <label for="bySize">Размер автора сценария</label>
       <div class="slider-row">
         <input id="bySize" type="range" min="16" max="70" value="34">
         <div id="bySizeValue" class="value">34</div>
@@ -209,7 +209,7 @@
         <div id="letterSpacingValue" class="value">10</div>
       </div>
 
-      <label for="verticalShift">Сдвиг текста по вертикали</label>
+      <label for="verticalShift">Сдвиг по высоте</label>
       <div class="slider-row">
         <input id="verticalShift" type="range" min="-160" max="160" value="0">
         <div id="verticalShiftValue" class="value">0</div>
@@ -218,19 +218,19 @@
       <div class="checks">
         <label class="check">
           <input id="titleUppercase" type="checkbox" checked>
-          Название капсом
+          Название КАПСОМ
         </label>
 
         <label class="check">
           <input id="writerUppercase" type="checkbox" checked>
-          Имя сценариста капсом
+          Имя сценариста КАПСОМ
         </label>
       </div>
 
       <button id="downloadBtn" type="button">Скачать PNG</button>
 
       <p class="note">
-        Фон больше не используется: карточка собирается из чёрной подложки, световых полос и текстовых текстур.
+        made by SnRaijuu. Use it with respect to the original series pls!
       </p>
     </section>
 
