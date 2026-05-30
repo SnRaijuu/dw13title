@@ -272,9 +272,16 @@
       writer: new Image()
     };
 
-    fixedTextureImages.title.onload = () => draw();
-    fixedTextureImages.by.onload = () => draw();
-    fixedTextureImages.writer.onload = () => draw();
+        let fontsAreReady = false;
+
+        function drawWhenReady() {
+          if (!fontsAreReady) return;
+          draw();
+        }
+
+        fixedTextureImages.title.onload = drawWhenReady;
+        fixedTextureImages.by.onload = drawWhenReady;
+        fixedTextureImages.writer.onload = drawWhenReady;
 
     fixedTextureImages.title.src = "title_texture.png";
     fixedTextureImages.by.src = "by_texture.png";
@@ -1002,7 +1009,10 @@ ctx.restore();
 
     downloadBtn.addEventListener("click", downloadPng);
 
-    document.fonts.ready.then(draw);
+        document.fonts.ready.then(() => {
+          fontsAreReady = true;
+          draw();
+        });
   </script>
 </body>
 </html>
